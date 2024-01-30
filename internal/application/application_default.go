@@ -74,6 +74,21 @@ func (a *ApplicationDefault) SetUp() (err error) {
 		return
 	}
 
+	err = loader.NewInvoiceLoader(a.db).ReadAll()
+	if err != nil {
+		return
+	}
+
+	err = loader.NewProductsLoader(a.db).ReadAll()
+	if err != nil {
+		return
+	}
+
+	err = loader.NewSalesLoader(a.db).ReadAll()
+	if err != nil {
+		return
+	}
+
 	// - repository
 	rpCustomer := repository.NewCustomersMySQL(a.db)
 	rpProduct := repository.NewProductsMySQL(a.db)
