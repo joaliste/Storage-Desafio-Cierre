@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"math"
 	"net/http"
 
 	"app/internal"
@@ -27,6 +28,13 @@ type CustomerJSON struct {
 	LastName  string `json:"last_name"`
 	Condition int    `json:"condition"`
 }
+
+// TotalAmountsJSON is a struct that represents a customer in JSON format
+type TotalAmountsJSON struct {
+	Condition int     `json:"condition"`
+	Total     float64 `json:"total"`
+}
+
 // GetAll returns all customers
 func (h *CustomersDefault) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +73,7 @@ type RequestBodyCustomer struct {
 	LastName  string `json:"last_name"`
 	Condition int    `json:"condition"`
 }
+
 // Create creates a new customer
 func (h *CustomersDefault) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -104,6 +113,36 @@ func (h *CustomersDefault) Create() http.HandlerFunc {
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"message": "customer created",
 			"data":    cs,
+		})
+	}
+}
+
+// GetTotalAmounts returns all customers
+func (h *CustomersDefault) GetTotalAmounts() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// request
+		// ...
+
+		// process
+		c, err := h.sv.GetTotalAmounts()
+		if err != nil {
+			log.Println(err)
+			response.Error(w, http.StatusInternalServerError, "error getting customers")
+			return
+		}
+
+		// response
+		// - serialize
+		csJSON := make([]TotalAmountsJSON, len(c))
+		for ix, v := range c {
+			csJSON[ix] = TotalAmountsJSON{
+				Condition: v.Condition,
+				Total:     math.Round(v.Total*100) / 100,
+			}
+		}
+		response.JSON(w, http.StatusOK, map[string]any{
+			"message": "total amounts",
+			"data":    csJSON,
 		})
 	}
 }
